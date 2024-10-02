@@ -10,5 +10,11 @@ edition = "2021"
 log = "0.4.22"
 serde = { version = "1.0.210", features = ["derive"] }
 tokio = { version = "1.40.0", features = ["full"] }
+tokio-macros = "2.2.0"
 toml = "0.8.19"
 env_logger = "0.11.5"
+tempfile = "3.13.0"
+lazy_static = "1.4"
+
+[dev-dependencies]
+lazy_static = "1.4"

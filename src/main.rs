@@ -1,8 +1,7 @@
-use std::path::Path;
-
-use log::{error, info};
-use serde::Deserialize;
 use std::fs;
+
+use log::info;
+use serde::Deserialize;
 use tokio::runtime::Runtime;
 
 #[derive(Deserialize)]
@@ -26,7 +25,8 @@ fn setup_logging(log_level: &str) {
         "error" => log::LevelFilter::Error,
         _ => log::LevelFilter::Info,
     };
-    env_logger::Builder::new().filter(None, log_level).init();
+
+    let _log_builder = env_logger::Builder::new().filter_level(log_level).init();
 }
 
 async fn main_event_loop() {
@@ -35,7 +35,7 @@ async fn main_event_loop() {
 }
 
 fn main() {
-    let config_path = "/path/to/your/config.toml";
+    let config_path = "config/config.toml";
     let config = match load_config(config_path) {
         Ok(config) => config,
         Err(e) => {
@@ -52,4 +52,36 @@ fn main() {
     rt.block_on(async {
         main_event_loop().await;
     });
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs::File;
+    use std::io::Write;
+    use tempfile::tempdir;
+
+    #[test]
+    fn test_load_config_success() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("config.toml");
+        let mut file = File::create(&file_path).unwrap();
+        writeln!(file, "app_name = 'TestApp'\nlog_level = 'info'").unwrap();
+
+        let config = load_config(file_path.to_str().unwrap()).unwrap();
+        assert_eq!(config.app_name, "TestApp");
+        assert_eq!(config.log_level, "info");
+    }
+
+    #[test]
+    fn test_load_config_failure() {
+        let result = load_config("non_existent_file.toml");
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_main_event_loop() {
+        // This test is a placeholder. You should add more specific assertions
+        // based on what your main_event_loop function does.
+        main_event_loop().await;
+    }
 }
